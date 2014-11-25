@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" ng-app="demoApp">
+<head>
+<meta charset="utf8">
+<title>Test - ETV search autocomplete</title>
+<!-- Underscore -->
+<script src="/bower_components/underscore/underscore.js"></script>
+<!-- Jquery -->
+<script src="/bower_components/jquery/dist/jquery.js"></script>
+<!-- Angular -->
+<script src="/bower_components/angular/angular.js"></script>
+<!-- Angular bootstrap -->
+<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+<script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<!-- Module -->
+<script src="/out/directive-proxy.js"></script>
+<script src="/out/parsers.js"></script>
+<script src="/out/fields.js"></script>
+<style>
+	body {
+		padding: 10px 20px 20px;
+	}
+	h1 {
+		font-size: 24pt;
+		font-weight: bold;
+	}
+	h2 {
+		font-size: 14pt;
+		font-weight: bold;
+	}
+	.field {
+		border: 1px solid #ccc;
+		border-radius: 10px;
+		margin: 10px;
+		position: relative;
+		padding: 15px 10px 10px 10px;
+	}
+	.field-label {
+		position: absolute;
+		top: -10px;
+		left: 12px;
+		background: white;
+		padding: 0 2px;
+	}
+	.radio-group {
+		margin-left: 0.5em;
+		display: block;
+	}
+	.radio-group-label {
+		display: block;
+		font-weight: normal;
+		font-style: oblique;
+	}
+	.radio-item {
+		margin: 0.5em;
+	}
+	.radio-button-label {
+		margin-left: 0.25em;
+		font-weight: normal;
+	}
+	.invalid {
+		background: rgba(255, 0, 0, 0.3);
+	}
+</style>
+
+<script>
+angular.module('demoApp', ['battlesnake.fields']);
+angular.module('demoApp')
+	.controller('demoController', function ($scope, $http, $q, $window) {
+
+		$scope.model = {
+			target: null
+		};
+
+		$scope.search = function (what) {
+			if (!what) {
+				return $q.when($scope.data = null);
+			}
+			return $http(
+				{
+					url: 'http://etv.err.ee/search',
+					method: 'GET',
+					params: {
+						what: what,
+						page: 0
+					}
+				})
+				.then(function (res) { return res.data; })
+				.then(getResultsFromHTML);
+		};
+
+		$scope.openResult = function () {
+			$window.open($scope.model.target);
+		};
+
+		function getResultsFromHTML(html) {
+			html = html.replace(/\s(href|src)/g, ' data-x-\\&');
+			return $(html).find('.newslist>li>a').map(function () {
+				var el = $(this);
+				return {
+					url: 'http://etv.err.ee' + el.attr('data-x-href'),
+					title: el.find('.newsitem').text().trim(),
+					date: Date.parse(el.find('.timestamp').text().trim() + ' EET', 'dd.mm.yyyy hh:mm Z')
+				};
+			}).get();
+		}
+	});
+</script>
+
+</head>
+
+<body>
+
+<h1>Choice directive, bound to promise factory</h1>
+<h2>Uses main search on etv.err.ee to provide suggestions</h2>
+<hr>
+
+<fieldset ng-controller="demoController">
+<legend>etv search with autocomplete, filter by title match </legend>
+
+	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search"
+		x-choices="result.url as result.title for result in search($viewValue)"></field:auto>
+
+<input type="button" ng-click="openResult()" ng-disabled="!model.target" value="go">
+</fieldset>
+
+<fieldset ng-controller="demoController">
+<legend>etv search with autocomplete, don't filter</legend>
+
+	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search,nofilter"
+		x-choices="result.url as result.title for result in search($viewValue)"></field:auto>
+
+<input type="button" ng-click="openResult()" ng-disabled="!model.target" value="go">
+</fieldset>
+
+</body>
+
+</html>
