@@ -72,38 +72,33 @@ angular.module('demoApp')
 			target: null
 		};
 
-		$scope.search = function (what) {
-			if (!what) {
+		$scope.search = function (phrase) {
+			if (!phrase) {
 				return $q.when($scope.data = null);
 			}
 			return $http(
 				{
-					url: 'http://etv.err.ee/search',
+					url: 'http://etv.err.ee/api/search/contents',
 					method: 'GET',
 					params: {
-						what: what,
-						page: 0
+						phrase: phrase,
+						page: 0,
+						size: 8,
 					}
 				})
-				.then(function (res) { return res.data; })
-				.then(getResultsFromHTML);
+				.then(function (res) { return res.data.Results; });
 		};
 
 		$scope.openResult = function () {
-			$window.open($scope.model.target);
+			var url = $scope.model.target;
+			if (!/^(http.?\:\/\/)?[\w\.]+?\.err\.ee\//i.test(url)) {
+				url = 'etv.err.ee/' + url;
+			}
+			if (!/^https?\:\/\//i.test(url)) {
+				url = 'http://' + url;
+			}
+			$window.open(url);
 		};
-
-		function getResultsFromHTML(html) {
-			html = html.replace(/\s(href|src)/g, ' data-x-\\&');
-			return $(html).find('.newslist>li>a').map(function () {
-				var el = $(this);
-				return {
-					url: 'http://etv.err.ee' + el.attr('data-x-href'),
-					title: el.find('.newsitem').text().trim(),
-					date: Date.parse(el.find('.timestamp').text().trim() + ' EET', 'dd.mm.yyyy hh:mm Z')
-				};
-			}).get();
-		}
 	});
 </script>
 
@@ -112,25 +107,25 @@ angular.module('demoApp')
 <body>
 
 <h1>Choice directive, bound to promise factory</h1>
-<h2>Uses main search on etv.err.ee to provide suggestions</h2>
+<h2>Uses search API on etv.err.ee to provide suggestions</h2>
 <hr>
 
 <fieldset ng-controller="demoController">
 <legend>etv search with autocomplete, filter by title match </legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search"
-		x-choices="result.url as result.title for result in search($viewValue)"></field:auto>
+		x-choices="result.Url as result.Header for result in search($viewValue)"></field:auto>
 
-<input type="button" ng-click="openResult()" ng-disabled="!model.target" value="go">
+<input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
 
 <fieldset ng-controller="demoController">
 <legend>etv search with autocomplete, don't filter</legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search,nofilter"
-		x-choices="result.url as result.title for result in search($viewValue)"></field:auto>
+		x-choices="result.Url as result.Header for result in search($viewValue)"></field:auto>
 
-<input type="button" ng-click="openResult()" ng-disabled="!model.target" value="go">
+<input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
 
 </body>
