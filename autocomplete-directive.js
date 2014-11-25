@@ -40,7 +40,7 @@
 					custom: false,
 					optional: false,
 					regexp: false,
-					filtered: false,
+					nofilter: false,
 					show: defaultSuggestionCount
 				});
 			/* Value binding */
@@ -59,19 +59,19 @@
 
 			return;
 
-			function queryChoices(search) {
+			function queryChoices($viewValue) {
 				var searchRx, searchFn;
-				if (hints.filtered || search.length === 0) {
+				if (hints.nofilter || $viewValue.length === 0) {
 					searchFn = function () { return true; };
 				} else {
 					if (hints.regexp) {
-						searchRx = new RegExp(search, 'i');
+						searchRx = new RegExp($viewValue, 'i');
 					} else {
-						searchRx = new RegExp('(^|\\W)' + search.replace(/[\.\+\*\?\(\)\[\]\|\\\"\^\$]/g, '\\\&'), 'i');
+						searchRx = new RegExp('(^|\\W)' + $viewValue.replace(/[\.\+\*\?\(\)\[\]\|\\\"\^\$]/g, '\\\&'), 'i');
 					}
 					searchFn = function (str) { return searchRx.test(str); };
 				}
-				return choicesController.requery()
+				return choicesController.requery({ $viewValue: $viewValue })
 					.then(function (items) {
 						var remaining = parseInt(hints.show) || Infinity;
 						return _(items)

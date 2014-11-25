@@ -110,12 +110,12 @@
 			}
 		}
 
-		function requeryChoices() {
-			return choices.requery();
+		function requeryChoices(vars) {
+			return choices.requery.apply(choices, arguments);
 		}
 
-		function refreshChoices() {
-			return choices.refresh();
+		function refreshChoices(vars) {
+			return choices.refresh.apply(choices, arguments);
 		}
 
 		function getIsDynamic() {
