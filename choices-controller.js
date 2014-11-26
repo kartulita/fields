@@ -110,11 +110,11 @@
 			}
 		}
 
-		function requeryChoices(vars) {
+		function requeryChoices(/*args*/) {
 			return choices.requery.apply(choices, arguments);
 		}
 
-		function refreshChoices(vars) {
+		function refreshChoices(/*args*/) {
 			return choices.refresh.apply(choices, arguments);
 		}
 
