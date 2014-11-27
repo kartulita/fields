@@ -37,8 +37,7 @@
 		function link(scope, element, attrs, choicesController) {
 			var hints = hintParseService.parse(attrs.hints,
 				{
-					custom: false,
-					optional: false,
+					/*custom: false,*/
 					regexp: false,
 					nofilter: false,
 					show: defaultSuggestionCount
@@ -52,13 +51,14 @@
 			/* Choice controller */
 			choicesController.onSelectionChanged = selectionChanged;
 			/* Custom values? */
-			scope.editable = hints.custom;
+			scope.editable = false; /*hints.custom;*/
 
 			/* DOM */
 			var control = element.find('input');
 
 			return;
 
+			/* Get a list of suggestions */
 			function queryChoices($viewValue) {
 				var searchRx, searchFn;
 				if (hints.nofilter || $viewValue.length === 0) {
@@ -81,6 +81,7 @@
 					});
 			}
 
+			/* Selection changed for any reason, update control */
 			function selectionChanged(item) {
 				/*
 				 * Don't update the model if this is in response to items refresh
@@ -90,6 +91,7 @@
 				}
 			}
 
+			/* Item selected in control, update viewmodel */
 			function onSelect(item) {
 				if (item) {
 					choicesController.viewChanged(item.index);
