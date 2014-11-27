@@ -5,8 +5,6 @@
 <title>Test - ETV search autocomplete</title>
 <!-- Underscore -->
 <script src="/bower_components/underscore/underscore.js"></script>
-<!-- Jquery -->
-<script src="/bower_components/jquery/dist/jquery.js"></script>
 <!-- Angular -->
 <script src="/bower_components/angular/angular.js"></script>
 <!-- Angular bootstrap -->
@@ -72,7 +70,7 @@ angular.module('demoApp')
 			target: null
 		};
 
-		$scope.search = function (phrase) {
+		$scope.search = function (phrase, count) {
 			if (!phrase) {
 				return $q.when($scope.data = null);
 			}
@@ -83,7 +81,7 @@ angular.module('demoApp')
 					params: {
 						phrase: phrase,
 						page: 0,
-						size: 8,
+						size: count || 8,
 					}
 				})
 				.then(function (res) { return res.data.Results; });
@@ -114,7 +112,7 @@ angular.module('demoApp')
 <legend>etv search with autocomplete, filter by title match </legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search"
-		x-choices="result.Url as result.Header for result in search($viewValue)"></field:auto>
+		x-choices="result.Url as result.Header for result in {[search($viewValue, 50)]}"></field:auto>
 
 <input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
@@ -123,7 +121,7 @@ angular.module('demoApp')
 <legend>etv search with autocomplete, don't filter</legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search,nofilter"
-		x-choices="result.Url as result.Header for result in search($viewValue)"></field:auto>
+		x-choices="result.Url as result.Header for result in {[search($viewValue, 8)]}"></field:auto>
 
 <input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
