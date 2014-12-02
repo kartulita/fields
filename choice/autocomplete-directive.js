@@ -6,7 +6,7 @@
 
 	var defaultSuggestionCount = 8;
 
-	function autocompleteDirective(hintParseService) {
+	function autocompleteDirective() {
 		var elements = {
 			autocomplete: angular.element('<input/>')
 				.attr({
@@ -22,7 +22,7 @@
 		return {
 			restrict: 'E',
 			replace: true,
-			require: 'choices',
+			require: ['choices', '?hints'],
 			template: '<div class="field-autocomplete"/>',
 			scope: { },
 			compile: compile,
@@ -34,14 +34,10 @@
 			return link;
 		}
 		
-		function link(scope, element, attrs, choicesController) {
-			var hints = hintParseService.parse(attrs.hints,
-				{
-					/*custom: false,*/
-					regexp: false,
-					nofilter: false,
-					show: defaultSuggestionCount
-				});
+		function link(scope, element, attrs, ctrl) {
+			var choices = ctrl[0];
+			var hints = ctrl[1];
+
 			/* Value binding */
 			scope.model = {
 				value: undefined,
@@ -49,19 +45,23 @@
 			scope.queryChoices = queryChoices;
 			scope.onSelect = onSelect;
 			/* Choice controller */
-			choicesController.onSelectionChanged = selectionChanged;
-			/* Custom values? */
-			scope.editable = false; /*hints.custom;*/
+			choices.onSelectionChanged = selectionChanged;
 
 			/* DOM */
 			var control = element.find('input');
+
+			hints.defaults({
+				regexp: false,
+				filter: true,
+				show: defaultSuggestionCount
+			});
 
 			return;
 
 			/* Get a list of suggestions */
 			function queryChoices($viewValue) {
 				var searchRx, searchFn;
-				if (hints.nofilter || $viewValue.length === 0) {
+				if (hints('filter') || $viewValue.length === 0) {
 					searchFn = function () { return true; };
 				} else {
 					if (hints.regexp) {
@@ -71,9 +71,9 @@
 					}
 					searchFn = function (str) { return searchRx.test(str); };
 				}
-				return choicesController.requery({ $viewValue: $viewValue })
+				return choices.requery({ $viewValue: $viewValue })
 					.then(function (items) {
-						var remaining = parseInt(hints.show) || Infinity;
+						var remaining = parseInt(hints('show')) || Infinity;
 						return _(items)
 							.filter(function (item) {
 								return remaining > 0 && searchFn(item.label) && !!(remaining--);
@@ -82,19 +82,19 @@
 			}
 
 			/* Selection changed for any reason, update control */
-			function selectionChanged(item) {
+			function selectionChanged(items) {
 				/*
 				 * Don't update the model if this is in response to items refresh
 				 */
 				if (document.activeElement !== control[0]) {
-					scope.model.value = item;
+					scope.model.value = items.length ? items[0] : undefined;
 				}
 			}
 
 			/* Item selected in control, update viewmodel */
 			function onSelect(item) {
 				if (item) {
-					choicesController.viewChanged(item.index);
+					choices.selectItem(item);
 				}
 			}
 		}

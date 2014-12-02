@@ -8,16 +8,23 @@
 
 	/**
 	 * @ngdoc directive
+	 * @name field:auto
+	 * @see {@link field}
+	 */
+
+	/**
+	 * @ngdoc directive
 	 * @name field
 	 *
 	 * @description
 	 * Facade for creating form fields.  Completely isolates the implementation
 	 * of the field from the controller.  The implementation is chosen based on
-	 * two parameters, passed via attributes: purpose, hints.
+	 * two parameters, passed via attributes: a compulsory `purpose`, and some
+	 * optional `hints`.
 	 *
 	 * `<field>` is also defined as `<field:auto>`
 	 *
-	 * @param purpose {string} Required.
+	 * @param {string} purpose
 	 * Specifies the purpose of the field.  Examples include:
 	 *
 	 *  * choice
@@ -30,11 +37,11 @@
 	 * You may also explicitly request a certain implementation by specifying the
 	 * name of the implementation as the "purpose", e.g. "radio-button-list".
 	 *
-	 * @param title {string} Required.
+	 * @param {string} title
 	 * Specifies the title of the field.  The field control is wrapped in a
 	 * `<label/>` element with this title.
 	 *
-	 * @param hints {string} Optional.
+	 * @param {string} [hints]
 	 * A comma-separated list of flags/values that are used to help choose and
 	 * implementation.  The syntax is: hint,another,not negated,param=value.
 	 * Most hints only need to be present (and can be explicitly "unspecified"
@@ -48,7 +55,8 @@
 	 *
 	 * @example
 	 * <field title="City" purpose="choice" hints="search" ng-model="model.city"
-	 *   choices="model.cities"></field>
+	 *   choices="model.cities">
+	 * </field>
 	 */
 	function fieldDirective(directiveProxyService) {
 		return directiveProxyService.generateDirective(

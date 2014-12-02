@@ -2,23 +2,24 @@
 	'use strict';
 
 	angular.module('battlesnake.fields')
-		.directive('fieldRadioButtonList', radioButtonListDirective);
+		.directive('fieldBooleanButtonList', booleanButtonListDirective);
 
-	function radioButtonListDirective() {
+	function booleanButtonListDirective() {
 		var elements = {
 			dummy: angular.element('<input type="checkbox" style="display:none;"/>'),
-			item: angular.element('<label class="radio-item"/>'),
-			button: angular.element('<input class="radio-button" type="radio"/>'),
-			group: angular.element('<span class="radio-group"/>'),
-			buttonLabel: angular.element('<span class="radio-button-label"/>'),
-			groupLabel: angular.element('<span class="radio-group-label"/>')
+			item: angular.element('<label class="boolean-item"/>'),
+			radio: angular.element('<input class="boolean-button radio-button" type="radio"/>'),
+			check: angular.element('<input class="boolean-button check-button" type="check"/>'),
+			group: angular.element('<span class="boolean-button-group"/>'),
+			buttonLabel: angular.element('<span class="boolean-button-label"/>'),
+			groupLabel: angular.element('<span class="boolean-group-label"/>')
 		};
 		var groupIndex = 0;
 		return {
 			restrict: 'E',
 			replace: true,
 			require: 'choices',
-			template: '<div class="field-radio-button-list"/>',
+			template: '<div class="field-boolean-button-list"/>',
 			compile: compile,
 			link: link
 		};
@@ -33,37 +34,37 @@
 			choicesController.onChoicesChanged = choicesChanged;
 
 			/* DOM */
-			var thisGroup = 'field-radio-button-list-' + groupIndex++;
+			var thisGroup = 'field-boolean-button-list-' + groupIndex++;
 			var buttons = [];
+
+			hints
+				.defaults({
+					multi: false
+				})
+				.watch('multi', function () {
+					choices.rebuildChoices();
+				});
 
 			return;
 
-			/* Radio button selected */
-			function radioButtonSelected() {
-				var selected = _(buttons)
-					.find(function (el) {
-						return el.checked;
-					});
-				var index = selected ? parseInt(selected.value) : -1;
+			/* Button selected */
+			function buttonSelected() {
+				var indices = _(buttons).chain()
+					.where({ checked: true })
+					.pluck('value')
+					.map(function (value) { return parseInt(value, 10); })
+					.value();
 				scope.$apply(function () {
-					choicesController.viewChanged(index);
+					choicesController.viewChanged(indices, 'replace');
 				});
 			}
 
 			/* Set selected item */
-			function selectionChanged(item) {
-				var button = item &&
-					_(buttons)
-						.find(function (el) {
-							return parseInt(el.value) === item.index;
-						});
-				if (button) {
-					button.checked = true;
-				} else {
-					_(buttons).forEach(function (button) {
-						button.checked = false;
-					});
-				}
+			function selectionChanged(items) {
+				_(buttons).forEach(function (button) {
+					button.checked = _(items)
+						.findWhere({ index: parseInt(button.value, 10) });
+				});
 			}
 
 			/* ng jqLite does not support appending multiple elements */
@@ -108,13 +109,13 @@
 			function createOption(opt) {
 				var label = elements.buttonLabel.clone()
 					.text(opt.label);
-				var button = elements.button.clone()
+				var button = (hints.multi ? elements.check : elements.radio).clone()
 					.attr('name', thisGroup)
 					.attr('value', opt.index);
 				var item = elements.item.clone()
 					.append(button)
 					.append(label);
-				button.on('change', radioButtonSelected);
+				button.on('change', buttonSelected);
 				buttons.push(button[0]);
 				return item;
 			}

@@ -2,9 +2,9 @@
 	'use strict';
 
 	angular.module('battlesnake.fields')
-		.directive('fieldDropDownList', dropDownListDirective);
+		.directive('fieldList', listDirective);
 
-	function dropDownListDirective() {
+	function listDirective() {
 		var elements = {
 			select: angular.element(document.createElement('select')),
 			option: angular.element(document.createElement('option')),
@@ -13,7 +13,7 @@
 		return {
 			restrict: 'E',
 			replace: true,
-			require: 'choices',
+			require: ['choices', 'hints'],
 			template: '<div class="field-drop-down-list"/>',
 			compile: compile,
 			link: link
@@ -24,26 +24,52 @@
 			return link;
 		}
 
-		function link(scope, element, attrs, choicesController) {
+		function link(scope, element, attrs, ctrl) {
+			var choices = ctrl[0];
+			var hints = ctrl[1];
+
 			/* Choice controller */
-			choicesController.onSelectionChanged = selectionChanged;
-			choicesController.onChoicesChanged = choicesChanged;
+			choices.onSelectionChanged = selectionChanged;
+			choices.onChoicesChanged = choicesChanged;
 
 			/* DOM */
 			var control = element.find('select');
 			control.on('change', listItemSelected);
+			var options;
+
+			hints
+				.defaults({
+					multi: false,
+					show: 1
+				})
+				.watch('multi', function (value) {
+					control.multiple = !!value;
+				})
+				.watch('show', function (value) {
+					value = parseInt(value, 10);
+					control.show = value > 1 ? value : 1;
+				});
 
 			/* View value changed */
 			function listItemSelected() {
-				var index = parseInt(control.val());
+				var indices = _(options).chain()
+					.where({ selected: true })
+					.pluck('value')
+					.map(function (val) {
+						return parseInt(val, 10);
+					})
+					.value();
 				scope.$apply(function () {
-					choicesController.viewChanged(index);
+					choices.viewChanged(indices, 'replace');
 				});
 			}
 
 			/* Set selected item */
-			function selectionChanged(item) {
-				control.val(item && item.index);
+			function selectionChanged(items) {
+				_(options).forEach(function (option) {
+					option.selected = !!_(items)
+						.where({ index: parseInt(option.value, 10) });
+				});
 			}
 
 			/* ng jqLite does not support appending multiple elements */
@@ -56,6 +82,7 @@
 			/* Rebuild list contents */
 			function choicesChanged(items, grouped) {
 				control.empty();
+				options = [];
 				appendMany(control, grouped ?
 					createGroups(_(items).groupBy('group')) :
 					createOptions(items));
@@ -81,9 +108,11 @@
 
 			/* Create an option */
 			function createOption(opt) {
-				return elements.option.clone()
+				var option = elements.option.clone()
 					.attr('value', opt.index)
 					.text(opt.label);
+				options.push(option);
+				return option;
 			}
 		}
 	}
