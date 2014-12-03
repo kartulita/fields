@@ -8,17 +8,17 @@
 		var elements = {
 			dummy: angular.element('<input type="checkbox" style="display:none;"/>'),
 			item: angular.element('<label class="boolean-item"/>'),
-			radio: angular.element('<input class="boolean-button radio-button" type="radio"/>'),
-			check: angular.element('<input class="boolean-button check-button" type="check"/>'),
+			radio: angular.element('<input class="boolean-button" type="radio"/>'),
+			check: angular.element('<input class="boolean-button" type="checkbox"/>'),
 			group: angular.element('<span class="boolean-button-group"/>'),
 			buttonLabel: angular.element('<span class="boolean-button-label"/>'),
-			groupLabel: angular.element('<span class="boolean-group-label"/>')
+			groupLabel: angular.element('<span class="boolean-button-group-label"/>')
 		};
 		var groupIndex = 0;
 		return {
 			restrict: 'E',
 			replace: true,
-			require: 'choices',
+			require: ['choices', 'hints'],
 			template: '<div class="field-boolean-button-list"/>',
 			compile: compile,
 			link: link
@@ -28,10 +28,13 @@
 			return link;
 		}
 		
-		function link(scope, element, attrs, choicesController) {
+		function link(scope, element, attrs, ctrl) {
+			var choices = ctrl[0];
+			var hints = ctrl[1];
+
 			/* Choice controller */
-			choicesController.onSelectionChanged = selectionChanged;
-			choicesController.onChoicesChanged = choicesChanged;
+			choices.onSelectionChanged = selectionChanged;
+			choices.onChoicesChanged = choicesChanged;
 
 			/* DOM */
 			var thisGroup = 'field-boolean-button-list-' + groupIndex++;
@@ -41,8 +44,8 @@
 				.defaults({
 					multi: false
 				})
-				.watch('multi', function () {
-					choices.rebuildChoices();
+				.watch('multi', function (value) {
+					angular.element(buttons).attr('type', value ? 'checkbox' : 'radio');
 				});
 
 			return;
@@ -52,10 +55,9 @@
 				var indices = _(buttons).chain()
 					.where({ checked: true })
 					.pluck('value')
-					.map(function (value) { return parseInt(value, 10); })
 					.value();
 				scope.$apply(function () {
-					choicesController.viewChanged(indices, 'replace');
+					choices.viewChanged(indices, 'replace');
 				});
 			}
 

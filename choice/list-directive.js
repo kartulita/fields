@@ -43,11 +43,11 @@
 					show: 1
 				})
 				.watch('multi', function (value) {
-					control.multiple = !!value;
+					control[0].multiple = !!value;
 				})
 				.watch('show', function (value) {
 					value = parseInt(value, 10);
-					control.show = value > 1 ? value : 1;
+					control[0].size = value > 1 ? value : 1;
 				});
 
 			/* View value changed */
@@ -55,9 +55,6 @@
 				var indices = _(options).chain()
 					.where({ selected: true })
 					.pluck('value')
-					.map(function (val) {
-						return parseInt(val, 10);
-					})
 					.value();
 				scope.$apply(function () {
 					choices.viewChanged(indices, 'replace');
@@ -66,9 +63,10 @@
 
 			/* Set selected item */
 			function selectionChanged(items) {
+				var indices = _(items).pluck('index');
 				_(options).forEach(function (option) {
-					option.selected = !!_(items)
-						.where({ index: parseInt(option.value, 10) });
+					option.selected = _(indices)
+						.contains(parseInt(option.value, 10));
 				});
 			}
 
@@ -111,7 +109,7 @@
 				var option = elements.option.clone()
 					.attr('value', opt.index)
 					.text(opt.label);
-				options.push(option);
+				options.push(option[0]);
 				return option;
 			}
 		}

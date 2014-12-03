@@ -13,6 +13,7 @@
 					class: 'autocomplete-text-box',
 					type: 'text',
 					'ng-model': 'model.value',
+					'ng-disabled': 'multi',
 					typeahead: 'choice as choice.label for choice in queryChoices($viewValue)',
 					'typeahead-on-select': 'onSelect($item, $model, $label)',
 					'typeahead-loading': 'model.loading',
@@ -42,29 +43,35 @@
 			scope.model = {
 				value: undefined,
 			};
+			scope.multi = false;
 			scope.queryChoices = queryChoices;
 			scope.onSelect = onSelect;
 			/* Choice controller */
 			choices.onSelectionChanged = selectionChanged;
+			choices.onModelChanging = modelChanging;
 
 			/* DOM */
 			var control = element.find('input');
 
-			hints.defaults({
-				regexp: false,
-				filter: true,
-				show: defaultSuggestionCount
-			});
+			hints
+				.defaults({
+					regexp: false,
+					filter: true,
+					show: defaultSuggestionCount
+				})
+				.watch('multi', function (value) {
+					scope.multi = value;
+				});
 
 			return;
 
 			/* Get a list of suggestions */
 			function queryChoices($viewValue) {
 				var searchRx, searchFn;
-				if (hints('filter') || $viewValue.length === 0) {
+				if (!hints('filter') || $viewValue.length === 0) {
 					searchFn = function () { return true; };
 				} else {
-					if (hints.regexp) {
+					if (hints('regexp')) {
 						searchRx = new RegExp($viewValue, 'i');
 					} else {
 						searchRx = new RegExp('(^|\\W)' + $viewValue.replace(/[\.\+\*\?\(\)\[\]\|\\\"\^\$]/g, '\\\&'), 'i');
@@ -73,11 +80,20 @@
 				}
 				return choices.requery({ $viewValue: $viewValue })
 					.then(function (items) {
-						var remaining = parseInt(hints('show')) || Infinity;
+						var remaining = hints('show');
 						return _(items)
 							.filter(function (item) {
 								return remaining > 0 && searchFn(item.label) && !!(remaining--);
 							});
+					});
+			}
+
+			/* Model changing, get new item */
+			function modelChanging(select) {
+				return choices.requery({ $viewValue: undefined, $select: select })
+					.then(function (item) {
+						console.log(item);
+						return select;
 					});
 			}
 
@@ -94,7 +110,7 @@
 			/* Item selected in control, update viewmodel */
 			function onSelect(item) {
 				if (item) {
-					choices.selectItem(item);
+					choices.viewChanged([item.index], 'replace');
 				}
 			}
 		}

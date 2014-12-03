@@ -1,0 +1,44 @@
+body {
+	padding: 10px 20px 20px;
+}
+h1 {
+	font-size: 24pt;
+	font-weight: bold;
+}
+h2 {
+	font-size: 14pt;
+	font-weight: bold;
+}
+.field {
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	margin: 10px;
+	position: relative;
+	padding: 15px 10px 10px 10px;
+}
+.field-label {
+	position: absolute;
+	top: -10px;
+	left: 12px;
+	background: white;
+	padding: 0 2px;
+}
+.boolean-button-group {
+	margin-left: 0.5em;
+	display: block;
+}
+.boolean-button-group-label {
+	display: block;
+	font-weight: normal;
+	font-style: oblique;
+}
+.boolean-item {
+	margin: 0.5em;
+}
+.boolean-button-label {
+	margin-left: 0.25em;
+	font-weight: normal;
+}
+.invalid {
+	background: rgba(255, 0, 0, 0.3);
+}

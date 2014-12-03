@@ -8,7 +8,7 @@
 	function hintsDirective() {
 		return {
 			restrict: 'A',
-			require: ['hints'],
+			require: 'hints',
 			controller: 'hintsController',
 			priority: 1,
 			link: link
@@ -35,7 +35,7 @@
 		get.watch = watch;
 		get.unwatch = unwatch;
 		get.reparse = reparse;
-		get.setDefaults = setDefaults;
+		get.defaults = mergeDefaults;
 
 		var self = get;
 
@@ -74,7 +74,7 @@
 		}
 
 		/* Set new defaults */
-		function setDefaults(extras) {
+		function mergeDefaults(extras) {
 			var newDefaults = _({}).defaults(defaults, extras);
 			update(hints, newDefaults);
 			return self;
@@ -114,8 +114,8 @@
 			defaults = newDefaults;
 			/* Notify observers */
 			notify.forEach(function notifyObservers(notification) {
-				notification.observer(notification.oldValue,
-					notification.newValue);
+				notification.observer(notification.newValue,
+					notification.oldValue);
 			});
 		}
 

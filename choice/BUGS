@@ -1,0 +1,7 @@
+BUGS
+
+When List is bound to promise (single-select), the initial selection is not set.
+
+When value is invalid, list defaults to first item
+
+Second field on etv-search demo misbehaves (not enough items shown)

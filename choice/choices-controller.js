@@ -32,12 +32,12 @@
 
 			/* Update view */
 			function modelChangedChoices() {
-				choices.modelChanged(ngModelController.$viewValue);
+				choices.modelChanged(ngModel.$viewValue);
 			}
 
 			/* Seleted value changed (update model) */
-			function selectionChanged(item) {
-				ngModel.$setViewValue(item && item.select);
+			function selectionChanged(value) {
+				ngModel.$setViewValue(value);
 			}
 		}
 
@@ -83,6 +83,7 @@
 
 		this.onSelectionChanged = undefined;
 		this.onChoicesChanged = undefined;
+		this.onModelChanging = undefined;
 
 		this.rebuildChoices = rebuildChoices;
 
@@ -111,6 +112,11 @@
 
 		return this;
 
+		/* Parse each element as integer */
+		function arrToInt(arr) {
+			return arr.map(function (i) { return parseInt(i, 10); });
+		}
+
 		/*
 		 * Prevents triggering of selectionChanged notification.  Tracks if an
 		 * attempt to trigger the notification occurred, and if so, re-triggers
@@ -123,8 +129,8 @@
 			} finally {
 				batch--;
 				if (pendingChange && !batch) {
-					notifySelectionChanged();
 					pendingChange = false;
+					notifySelectionChanged();
 				}
 			}
 		}
@@ -140,7 +146,17 @@
 				pendingChange = true;
 				return;
 			}
-			$scope.selectionChanged(selected);
+			/* Update model */
+			if (!(selected instanceof Array)) {
+				throw new Error('selected is not an array');
+			}
+			var selects = _(selected).pluck('select');
+			if (multi) {
+				$scope.selectionChanged(selects);
+			} else {
+				$scope.selectionChanged(selects.length ? selects[0] : null);
+			}
+			/* Call optional event handler */
 			if (self.onSelectionChanged) {
 				self.onSelectionChanged(selected);
 			}
@@ -183,11 +199,7 @@
 					_(items).forEach(selectItem);
 				});
 			} else {
-				if (items && items.length) {
-					selectItem(items[0]);
-				} else {
-					setSelection([]);
-				}
+				setSelection((items || []).slice(0, 1));
 				notifySelectionChanged();
 			}
 		}
@@ -201,13 +213,15 @@
 
 		/* Explicitly set the selected items */
 		function setSelected(items) {
-			if (_.intersection(items, selected).length === selected.length) {
+			/* Anything changed? */
+			if (selected.length === items.length &&
+				_.intersection(items, selected).length === items.length) {
 				return;
 			}
 			if (multi) {
 				selected = items ? items.slice() : [];
 			} else {
-				selected = (items && items.length) ? items[0] : [];
+				selected = items ? items.slice(0, 1) : [];
 			}
 			notifySelectionChanged();
 		}
@@ -246,24 +260,39 @@
 		}
 
 		function modelChanged(select) {
-			if (multi) {
-				setSelected(findMultipleBySelect(select));
+			if (self.onModelChanging) {
+				self.onModelChanging(select)
+					.then(updateSelected);
 			} else {
-				setSelected(_(items).where({ select: select }));
+				updateSelected(select);
+			}
+
+			function updateSelected(select) {
+				if (multi) {
+					setSelected(findMultipleBySelect(select));
+				} else {
+					setSelected(_(items).where({ select: select }));
+				}
 			}
 		}
 
 		function viewChanged(indices, command) {
-			var items = findMultipleByIndex(indices);
+			if (indices === undefined || indices === null) {
+				throw new Error('Invalid index', indices);
+			}
+			if (!(indices instanceof Array)) {
+				indices = [indices];
+			}
+			var items = findMultipleByIndex(arrToInt(indices));
 			if (command === 'replace') {
 				setSelected(items);
-			} else if (command === true || command === 'select') {
+			} else if (command === 'select') {
 				if (multi) {
 					selectItems(items);
 				} else {
-					setSelected(items.splice(1));
+					setSelected(items);
 				}
-			} else if (command === false || command === 'deselect') {
+			} else if (command === 'deselect') {
 				if (multi) {
 					deselectItems(items);
 				} else {
