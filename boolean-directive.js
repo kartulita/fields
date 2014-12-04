@@ -4,13 +4,30 @@
 	angular.module('battlesnake.fields')
 		.directive('fieldBoolean', booleanDirective);
 
-	function booleanDirective($parse, directiveProxyService, hintParseService) {
+	/**
+	 * @ngdoc directive
+	 * @name field:boolean
+	 *
+	 * @description
+	 * Facade for creating boolean fields.
+	 *
+	 * @param {expression} [ng-true-value]
+	 * The value corresponding to `true`
+	 *
+	 * @param {expression} [ng-false-value]
+	 * The value corresponding to `false`
+	 *
+	 * @example
+	 * <field title="Awesome mode" purpose="boolean" ng-model="model.awesome"
+	 *   ng-true-value="'This is awesome'" ng-false-value="':('">
+	 * </field>
+	 */
+	function booleanDirective(directiveProxyService) {
 		return directiveProxyService.generateDirective(
 			'div',
 			function link(scope, element, attrs) {
 				element.addClass('field-boolean');
-				var booleans = $parse(attrs.booleans)(scope);
-				var implementation = 'checkbox';
+				var implementation = 'boolean-button';
 				directiveProxyService('field:' + implementation, { hints: 'copy' }, scope, element, attrs);
 			});
 	}

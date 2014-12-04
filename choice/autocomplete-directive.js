@@ -92,7 +92,7 @@
 			/* Model changing, get choice list containing new item */
 			function modelChanging(select) {
 				return choices.requery({ $params: { select: select } })
-					.then(function (item) {
+					.then(function () {
 						return select;
 					});
 			}

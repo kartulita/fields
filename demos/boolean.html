@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" ng-app="demoApp">
+<head>
+<meta charset="utf8">
+<title>Test - binding to static data</title>
+<!-- Underscore -->
+<script src="/bower_components/underscore/underscore.js"></script>
+<!-- Angular -->
+<script src="/bower_components/angular/angular.js"></script>
+<!-- Angular bootstrap -->
+<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+<script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<!-- Module -->
+<script src="/out/directive-proxy.js"></script>
+<script src="/out/parsers.js"></script>
+<script src="/out/fields.js"></script>
+<link href="style.css" rel="stylesheet">
+
+<script>
+angular.module('demoApp', ['battlesnake.fields'])
+	.controller('demoController', demoController);
+	
+function demoController($scope, $parse) {
+	$scope.model = {
+		exampleJson: {
+			lol: 'rofl',
+			omg: 'wtf'
+		},
+		exampleDate: new Date(),
+		trueValue: true,
+		falseValue: false,
+		value: false
+	};
+
+	$scope.vals = { trueValue: true, falseValue: false };
+
+	$scope.setValue = setValue;
+
+	function setValue(prop, rawValue) {
+		var rawValue = $scope.vals[prop];
+		try {
+			try {
+				value = JSON.parse(rawValue);
+			} catch (e) {
+				/* Eval once saved an old lady from a burning house, it totally is not evil */
+				value = $parse(rawValue)($scope.model);
+				if (value === rawValue || value === undefined || value === $scope.model) {
+					throw new Error();
+				}
+			}
+		} catch (e) {
+			value = rawValue;
+		}
+		$scope.model[prop] = value;
+	}
+
+}
+</script>
+
+</head>
+
+<body ng-controller="demoController">
+
+<h1>Boolean directive</h1>
+
+<hr>
+
+<fieldset>
+<legend>State model-values (JSON in model context if valid as JSON, string otherwise)</legend>
+<label class="field">
+<label><span class="field-label">True expression</span><input type="text" ng-model="vals.trueValue" ng-change="setValue('trueValue')"></label>
+</label>
+<label class="field">
+<label><span class="field-label">False expression</span><input type="text" ng-model="vals.falseValue" ng-change="setValue('falseValue')"></label>
+</label>
+</fieldset>
+
+<hr>
+
+<fieldset>
+<legend>The checkbox</legend>
+
+	<field:boolean title="Poke me" x-label="Poke me" x-purpose="boolean" ng-model="model.value" x-true-value="model.trueValue" x-false-value="model.falseValue"></field:boolean>
+
+<div style="height: 20px;"></div>
+</fieldset>
+
+<fieldset>
+<legend>Model</legend>
+<pre>{{ model | json }}</pre>
+</fieldset>
+
+</body>
+
+</html>
+
