@@ -42,3 +42,15 @@ h2 {
 .invalid {
 	background: rgba(255, 0, 0, 0.3);
 }
+
+
+
+.field input,
+.field select,
+.field textarea {
+	width: 100%;
+}
+
+.field input[type=button] {
+	width: 75px;
+}

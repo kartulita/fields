@@ -3,7 +3,8 @@
 
 	angular.module('battlesnake.fields')
 		.controller('choicesController', choicesController)
-		.directive('choices', choicesDirective);
+		.directive('choices', choicesDirective)
+		;
 
 	function choicesDirective($timeout) {
 		return {
@@ -246,17 +247,27 @@
 		function choicesChanged(newItems, isGrouped) {
 			items = newItems;
 			grouped = isGrouped;
-			var memos = _(preselect !== undefined ? preselect : selected)
-				.pluck('memo');
-			preselect = undefined;
-			rebuildChoices();
+			var memos;
+			/*
+			 * Preselect is used for setting the initial selection, since the
+			 * actual choices might not have been loaded when the "view value"
+			 * is initially set.
+			 */
+			if (preselect === undefined) {
+				memos = _(selected).pluck('memo');
+			} else {
+				memos = preselect instanceof Array ? preselect : [preselect];
+				preselect = undefined;
+				selected = [];
+			}
+			if (self.onChoicesChanged) {
+				self.onChoicesChanged(items, grouped);
+			}
 			setSelected(findMultipleByMemos(memos));
 		}
 
 		function rebuildChoices() {
-			if (self.onChoicesChanged) {
-				self.onChoicesChanged(items, grouped);
-			}
+			choicesChanged(items, grouped);
 		}
 
 		function modelChanged(select) {

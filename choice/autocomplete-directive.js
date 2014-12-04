@@ -66,19 +66,20 @@
 			return;
 
 			/* Get a list of suggestions */
-			function queryChoices($viewValue) {
+			function queryChoices(query) {
 				var searchRx, searchFn;
-				if (!hints('filter') || $viewValue.length === 0) {
+				if (!hints('filter') || query.length === 0) {
 					searchFn = function () { return true; };
 				} else {
 					if (hints('regexp')) {
-						searchRx = new RegExp($viewValue, 'i');
+						searchRx = new RegExp(query, 'i');
 					} else {
-						searchRx = new RegExp('(^|\\W)' + $viewValue.replace(/[\.\+\*\?\(\)\[\]\|\\\"\^\$]/g, '\\\&'), 'i');
+						searchRx = new RegExp('(^|\\W)' + query.replace(/[\.\+\*\?\(\)\[\]\|\\\"\^\$]/g, '\\\&'), 'i');
 					}
 					searchFn = function (str) { return searchRx.test(str); };
 				}
-				return choices.requery({ $viewValue: $viewValue })
+				var select = scope.model.value ? scope.model.value.select : undefined;
+				return choices.requery({ $query: query, $params: { select: select } })
 					.then(function (items) {
 						var remaining = hints('show');
 						return _(items)
@@ -88,11 +89,10 @@
 					});
 			}
 
-			/* Model changing, get new item */
+			/* Model changing, get choice list containing new item */
 			function modelChanging(select) {
-				return choices.requery({ $viewValue: undefined, $select: select })
+				return choices.requery({ $params: { select: select } })
 					.then(function (item) {
-						console.log(item);
 						return select;
 					});
 			}

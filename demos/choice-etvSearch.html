@@ -16,19 +16,56 @@
 <script src="/out/fields.js"></script>
 <link href="style.css" rel="stylesheet">
 
+<style>
+.multifield.field {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: stretch;
+	border-width: 2px;
+	border-radius: 20px;
+	padding: 20px;
+}
+
+.multifield .selector {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	margin-bottom: 5px;
+}
+
+.multifield .selector .button-container {
+	margin-left: 5px;
+}
+
+.multifield .selector>* {
+	flex-grow: 1;
+}
+
+.multifield .button-container {
+	display: flex;
+	align-items: center;
+	flex-grow: 0;
+}
+
+.multifield .button {
+	flex: 0 0 75px;
+}
+</style>
+
 <script>
 angular.module('demoApp', ['battlesnake.fields'])
-	.controller('demoController', demoController);
+	.controller('simpleController', simpleController)
+	.controller('compositeController', compositeController);
 	
-function demoController($scope, $http, $q, $window) {
+function simpleController($scope, $http, $q, $window) {
 
 	$scope.model = {
-		target: null
+		target: null,
 	};
 
 	$scope.search = function (phrase, count) {
 		if (!phrase) {
-			return $q.when($scope.data = null);
+			return $q.when(null);
 		}
 		return $http(
 			{
@@ -53,6 +90,44 @@ function demoController($scope, $http, $q, $window) {
 		}
 		$window.open(url);
 	};
+
+}
+
+function compositeController($scope, $http, $q) {
+	$scope.model = {
+		search: null,
+		items: [],
+		sel: []
+	}
+
+	$scope.search = function (phrase) {
+		if (!phrase) {
+			return $q.when(null);
+		}
+		return $http(
+			{
+				url: 'http://etv.err.ee/api/search/contents',
+				method: 'GET',
+				params: {
+					phrase: phrase,
+					page: 0,
+					size: 50,
+				}
+			})
+			.then(function (res) { return res.data.Results; });
+	};
+
+	$scope.add = function (items) {
+		$scope.model.items = _.union($scope.model.items, items);
+	};
+
+	$scope.remove = function (items) {
+		$scope.model.items = _.difference($scope.model.items, items);
+	};
+
+	$scope.format = function (item) {
+		return item.Header + ' (' + item.Url + ')';
+	};
 }
 </script>
 
@@ -64,22 +139,49 @@ function demoController($scope, $http, $q, $window) {
 <h2>Uses search API on etv.err.ee to provide suggestions</h2>
 <hr>
 
-<fieldset ng-controller="demoController">
+<fieldset ng-controller="simpleController">
 <legend>etv search with autocomplete, filter by title match </legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search"
-		x-choices="result.Url as result.Header for result in {[search($viewValue, 50)]}"></field:auto>
+		x-choices="result.Url as result.Header for result in {[search($query, 50)]}"></field:auto>
 
 <input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
 
-<fieldset ng-controller="demoController">
+<fieldset ng-controller="simpleController">
 <legend>etv search with autocomplete, don't filter</legend>
 
-	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search,nofilter"
-		x-choices="result.Url as result.Header for result in {[search($viewValue, 8)]}"></field:auto>
+	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search,not filter"
+		x-choices="result.Url as result.Header for result in {[search($query, 8)]}"></field:auto>
 
 <input type="button" ng-click="openResult()" ng-show="model.target" value="go">
+</fieldset>
+
+<fieldset ng-controller="compositeController">
+<legend>Multiselect</legend>
+
+	<div class="multifield field">
+
+		<div class="selector">
+
+			<field:autocomplete ng-model="model.search" x-hints="not filter"
+				x-choices="result as result.Header for result in search($query)"></field:autocomplete>
+
+			<div class="button-container">
+				<input class="button" type="button" value="Add" ng-click="add([model.search])" ng-disabled="!model.search">
+			</div>
+
+		</div>
+
+		<field:list ng-model="model.sel" x-hints="multi,show=10"
+			x-choices="item as format(item) for item in model.items"></field:list>
+
+		<div class="button-container">
+			<input class="button" type="button" value="Remove" ng-click="remove(model.sel)" ng-disabled="!model.sel.length">
+		</div>
+
+	</div>
+
 </fieldset>
 
 </body>

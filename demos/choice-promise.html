@@ -26,8 +26,11 @@ function demoController($scope, $http) {
 		country: 'ee'
 	};
 
-	$scope.getCountries = function (filter, select) {
-		if (select !== undefined) {
+	$scope.getCountries = function (filter, params) {
+		var select = params && params.select;
+		filter = filter ? filter.toUpperCase() : '';
+		select = select ? select.toUpperCase() : '';
+		if (select.length && !filter.length) {
 			return $http.get('countries.json').then(function (res) { return res.data; })
 				.then(fakeServerSideGetItem);
 		} else {
@@ -43,15 +46,17 @@ function demoController($scope, $http) {
 			return _(data)
 				.filter(function (country) {
 					return !filter ||
-						country.name.indexOf(filter) !== -1 ||
-						country.tld.toUpperCase() === filter.toUpperCase();
+						country.name.toUpperCase().indexOf(filter) !== -1 ||
+						country.tld.toUpperCase() === filter ||
+						country.tld.toUpperCase() === select;
 				});
 		}
 
 		function fakeServerSideGetItem(data) {
-			console.log(select);
 			return _(data)
-				.where({ tld: select });
+				.filter(function (country) {
+					return country.tld.toUpperCase() === select;
+				});
 		}
 	};
 
@@ -69,13 +74,13 @@ function demoController($scope, $http) {
 <fieldset>
 <legend>hints: many</legend>
 <field:auto title="Pick a country" x-purpose="choice" ng-model="model.country" x-hints="many"
-	x-choices="country.tld as country.name for country in getCountries($viewValue)"></field:auto>
+	x-choices="country.tld as country.name for country in getCountries()"></field:auto>
 </fieldset>
 
 <fieldset>
 <legend>hints: search</legend>
 <field:auto title="Pick a country" x-purpose="choice" ng-model="model.country" x-hints="search"
-	x-choices="country.tld as country.name for country in getCountries($viewValue,$select)"></field:auto>
+	x-choices="country.tld as country.name for country in getCountries($query,$params)"></field:auto>
 </fieldset>
 
 <fieldset>

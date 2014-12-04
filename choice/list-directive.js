@@ -8,6 +8,9 @@
 		var elements = {
 			select: angular.element(document.createElement('select')),
 			option: angular.element(document.createElement('option')),
+			optionInvalid: angular.element(document.createElement('option'))
+				.attr({ value: -1, selected: true })
+				.text(''),
 			optgroup: angular.element(document.createElement('optgroup'))
 		};
 		return {
@@ -36,18 +39,24 @@
 			var control = element.find('select');
 			control.on('change', listItemSelected);
 			var options;
+			var invalidOption = elements.optionInvalid.clone();
+			var isMulti = false;
 
 			hints
 				.defaults({
 					multi: false,
-					show: 1
+					show: false
 				})
 				.watch('multi', function (value) {
-					control[0].multiple = !!value;
+					isMulti = !!value;
+					control[0].multiple = isMulti;
 				})
 				.watch('show', function (value) {
 					value = parseInt(value, 10);
-					control[0].size = value > 1 ? value : 1;
+					control[0].size =
+						(value === false || value === true) ?
+							isMulti ? 5 : 1 :
+							value > 1 ? value : 1;
 				});
 
 			/* View value changed */
@@ -64,10 +73,30 @@
 			/* Set selected item */
 			function selectionChanged(items) {
 				var indices = _(items).pluck('index');
+				var any = false;
 				_(options).forEach(function (option) {
 					option.selected = _(indices)
 						.contains(parseInt(option.value, 10));
+					any = any || option.selected;
 				});
+				setInvalid(!any && !isMulti);
+			}
+
+			/* Add "invalid" option and select it / remove "invalid" option */
+			function setInvalid(isInvalid) {
+				var hasInvalid = invalidOption.parent().length;
+				if (isInvalid) {
+					if (!hasInvalid) {
+						control.prepend(invalidOption);
+					}
+					_(options).forEach(function (option) {
+						option.selected = false;
+					});
+					invalidOption.selected = true;
+				} else if (hasInvalid) {
+					invalidOption.selected = false;
+					invalidOption.remove();
+				}
 			}
 
 			/* ng jqLite does not support appending multiple elements */
