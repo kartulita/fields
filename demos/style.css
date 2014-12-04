@@ -45,7 +45,7 @@ h2 {
 
 
 
-.field input,
+.field input[type=text],
 .field select,
 .field textarea {
 	width: 100%;

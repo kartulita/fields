@@ -73,7 +73,7 @@ function demoController($scope, $timeout) {
 	x-choices="number.value as number.title group by number.order for number in data.numbers"></field:auto>
 </fieldset>
 
-<fieldset>
+<fieldset ng-hide="model.multi">
 <legend>hints: search</legend>
 <field:auto title="Pick a number" x-purpose="choice" ng-model="model.number" x-hints="search,{{model.multi}}"
 	x-choices="number.value as number.title group by number.order for number in data.numbers"></field:auto>
