@@ -137,13 +137,16 @@ function compositeController($scope, $http, $q) {
 
 <h1>Choice directive, bound to promise factory</h1>
 <h2>Uses search API on etv.err.ee to provide suggestions</h2>
+<p>Since this demo requires unauthorized cross-origin requests, you must first
+disable your web browser's cross-origin request security filter before this demo
+will run.</p>
 <hr>
 
 <fieldset ng-controller="simpleController">
 <legend>etv search with autocomplete, filter by title match </legend>
 
 	<field:auto title="search" x-purpose="choice" ng-model="model.target" x-hints="search"
-		x-choices="result.Url as result.Header for result in {[search($query, 50)]}"></field:auto>
+		x-choices="result.Url as result.Header for result in {[search($query, 250)]}"></field:auto>
 
 <input type="button" ng-click="openResult()" ng-show="model.target" value="go">
 </fieldset>
@@ -168,12 +171,12 @@ function compositeController($scope, $http, $q) {
 				x-choices="result as result.Header for result in search($query)"></field:autocomplete>
 
 			<div class="button-container">
-				<input class="button" type="button" value="Add" ng-click="add([model.search])" ng-disabled="!model.search">
+				<input class="button" type="button" value="Add" ng-click="add([model.search]); model.search = null;" ng-disabled="!model.search">
 			</div>
 
 		</div>
 
-		<field:list ng-model="model.sel" x-hints="multi,show=10"
+		<field:list ng-model="model.sel" x-hints="multi,show=8"
 			x-choices="item as format(item) for item in model.items"></field:list>
 
 		<div class="button-container">
