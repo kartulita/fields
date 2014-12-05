@@ -72,11 +72,10 @@
 							.addClass('field-label')
 							.text(title)
 					);
-				if (purpose === 'auto') {
-					throw new Error('Field purpose cannot be "auto"');
+				if (purpose === 'auto' || purpose === '' || typeof purpose !== 'string') {
+					throw new Error('Field purpose cannot be "auto" or blank');
 				}
-				directiveProxyService('field:' + purpose, ['purpose'], scope, element, attrs)
-					.addClass('field-' + purpose);
+				directiveProxyService('field:' + purpose, scope, element, attrs);
 				return;
 			});
 	}

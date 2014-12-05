@@ -41,8 +41,8 @@ function demoController($scope, $timeout) {
 	$scope.data.numbers.forEach(function (number) {
 		number.order = 'Order: ' + Math.pow(10, Math.floor(Math.log10(number.value)));
 	});
-	$scope.model.all = _($scope.data.numbers).pluck('value');
-	$scope.model.none = [];
+	$scope.data.all = _($scope.data.numbers).pluck('value');
+	$scope.data.none = [];
 }
 </script>
 
@@ -65,7 +65,7 @@ function demoController($scope, $timeout) {
 
 <fieldset>
 <legend>hints: not many</legend>
-<field:auto title="Pick a number" x-purpose="choice" ng-model="model.number" x-hints="not many,{{model.multi}}"
+<field:auto title="Pick a number" x-purpose="choice" ng-model="model.number" x-hints="not many,{{model.multi}},group,all"
 	x-choices="number.value as number.title group by number.order for number in data.numbers"></field:auto>
 </fieldset>
 
@@ -84,7 +84,7 @@ function demoController($scope, $timeout) {
 <fieldset ng-show="model.multi">
 <legend>Multiselect decoration</legend>
 <field:auto title="All/none" x-label="Select all" x-purpose="boolean" ng-model="model.number"
-	x-true-value="model.all" x-false-value="model.none"></field:auto>
+	x-true-value="data.all" x-false-value="data.none"></field:auto>
 </fieldset>
 
 <fieldset>

@@ -9,7 +9,7 @@
 	function choicesDirective($timeout) {
 		return {
 			restrict: 'A',
-			require: ['choices', 'ngModel', 'hints'],
+			require: ['choices', 'ngModel', '?hints'],
 			controller: 'choicesController',
 			priority: 1,
 			scope: true,

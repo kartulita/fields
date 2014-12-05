@@ -16,7 +16,7 @@
 		return {
 			restrict: 'E',
 			replace: true,
-			require: ['choices', 'hints'],
+			require: ['choices', '?hints'],
 			template: '<div class="field-drop-down-list"/>',
 			compile: compile,
 			link: link

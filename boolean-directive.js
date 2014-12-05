@@ -28,7 +28,7 @@
 			function link(scope, element, attrs) {
 				element.addClass('field-boolean');
 				var implementation = 'boolean-button';
-				directiveProxyService('field:' + implementation, { hints: 'copy' }, scope, element, attrs);
+				directiveProxyService('field:' + implementation, scope, element, attrs);
 			});
 	}
 

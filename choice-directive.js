@@ -72,7 +72,7 @@
 					hints.search ? 'autocomplete' :
 					hints.many ? 'list' :
 					'boolean-button-list';
-				directiveProxyService('field:' + implementation, { hints: 'copy' }, scope, element, attrs);
+				directiveProxyService('field:' + implementation, scope, element, attrs);
 			});
 	}
 
