@@ -4,7 +4,7 @@
 	angular.module('battlesnake.fields')
 		.directive('fieldBooleanButtonList', booleanButtonListDirective);
 
-	function booleanButtonListDirective() {
+	function booleanButtonListDirective(l10n_fields) {
 		/*
 		 * element
 		 *   dummy
@@ -196,7 +196,7 @@
 				selectAllItem = elements.selectAll.clone();
 				selectAllItem
 					.find('span')
-					.text('All');
+					.text(l10n_fields.selectAllNone);
 				selectAllItem
 					.find('input')
 					.on('change', function () {

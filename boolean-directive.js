@@ -23,12 +23,13 @@
 	 * </field>
 	 */
 	function booleanDirective(directiveProxyService) {
-		return directiveProxyService.generateDirective(
+		return directiveProxyService(
 			'div',
+			[],
 			function link(scope, element, attrs) {
 				element.addClass('field-boolean');
 				var implementation = 'boolean-button';
-				directiveProxyService('field:' + implementation, scope, element, attrs);
+				return 'field:' + implementation;
 			});
 	}
 

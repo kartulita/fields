@@ -58,8 +58,9 @@
 	 * </field>
 	 */
 	function choiceDirective(listComprehensionService, directiveProxyService, hintParseService) {
-		return directiveProxyService.generateDirective(
+		return directiveProxyService(
 			'div',
+			[],
 			function link(scope, element, attrs) {
 				element.addClass('field-choice');
 				var hints = hintParseService.parse(attrs.hints, 
@@ -72,7 +73,7 @@
 					hints.search ? 'autocomplete' :
 					hints.many ? 'list' :
 					'boolean-button-list';
-				directiveProxyService('field:' + implementation, scope, element, attrs);
+				return 'field:' + implementation;
 			});
 	}
 

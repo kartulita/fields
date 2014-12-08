@@ -59,8 +59,9 @@
 	 * </field>
 	 */
 	function fieldDirective(directiveProxyService) {
-		return directiveProxyService.generateDirective(
+		return directiveProxyService(
 			'label',
+			['purpose', 'title'],
 			function link(scope, element, attrs) {
 				var purpose = attrs.purpose;
 				var title = attrs.title;
@@ -68,15 +69,14 @@
 					.addClass('field')
 					.addClass('field-' + purpose + '-container')
 					.append(
-						angular.element('<div/>')
+						angular.element('<span/>')
 							.addClass('field-label')
 							.text(title)
 					);
 				if (purpose === 'auto' || purpose === '' || typeof purpose !== 'string') {
 					throw new Error('Field purpose cannot be "auto" or blank');
 				}
-				directiveProxyService('field:' + purpose, scope, element, attrs);
-				return;
+				return 'field:' + purpose;
 			});
 	}
 
