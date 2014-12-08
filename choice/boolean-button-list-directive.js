@@ -6,7 +6,9 @@
 
 	function booleanButtonListDirective(l10n_fields) {
 		/*
-		 * element
+		 * Grouped:
+		 * 
+		 * field-boolean-button-list
 		 *   dummy
 		 *   boolean-button-select-all
 		 *     select-all-button boolean-button
@@ -20,7 +22,9 @@
 		 *         boolean-button
 		 *         boolean-button-label
 		 *
-		 * element
+		 * Not grouped:
+		 *
+		 * field-boolean-button-list
 		 *   dummy
 		 *   boolean-button-select-all
 		 *     select-all-button boolean-button

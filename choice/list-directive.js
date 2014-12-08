@@ -5,6 +5,10 @@
 		.directive('fieldList', listDirective);
 
 	function listDirective() {
+		/*
+		 * field-drop-down-list
+		 *   <select>
+		 */
 		var elements = {
 			select: angular.element(document.createElement('select')),
 			option: angular.element(document.createElement('option')),

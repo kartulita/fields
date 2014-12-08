@@ -5,6 +5,7 @@
 	 * @module battlesnake.fields
 	 * @requires parsers
 	 * @requires directive-proxy
+	 * @requires validators
 	 * @requires {@link http://angular-ui.github.io/bootstrap/|UI Bootstrap}
 	 * @requires {@link http://underscorejs.org|Underscore}
 	 *
@@ -14,6 +15,6 @@
 	 * on the data to display and on optional "hint" attributes.
 	 */
 
-	angular.module('battlesnake.fields', ['battlesnake.directive-proxy', 'battlesnake.parsers', 'ui.bootstrap']);
+	angular.module('battlesnake.fields', ['battlesnake.directive-proxy', 'battlesnake.parsers', 'battlesnake.validators', 'ui.bootstrap']);
 
 })(window.angular);

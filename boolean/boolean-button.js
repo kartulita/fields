@@ -5,6 +5,12 @@
 		.directive('fieldBooleanButton', booleanButtonDirective);
 
 	function booleanButtonDirective() {
+		/*
+		 * field-boolean-button
+		 *   boolean-item
+		 *     boolean-button
+		 *     boolean-button-label
+		 */
 		var elements = {
 			item: angular.element('<label class="boolean-item"/>'),
 			check: angular.element('<input class="boolean-button" type="checkbox"/>'),

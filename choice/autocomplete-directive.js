@@ -7,10 +7,14 @@
 	var defaultSuggestionCount = 8;
 
 	function autocompleteDirective() {
+		/*
+		 * field-autocomplete
+		 *   autocomplete-text-box text-box
+		 */
 		var elements = {
 			autocomplete: angular.element('<input/>')
 				.attr({
-					class: 'autocomplete-text-box',
+					class: 'autocomplete-text-box text-box',
 					type: 'text',
 					'ng-model': 'model.value',
 					'ng-disabled': 'multi',
@@ -30,8 +34,12 @@
 			link: link
 		};
 
-		function compile(element) {
+		function compile(element, attrs) {
 			element.append(elements.autocomplete.clone());
+			if (attrs.itemTemplate) {
+				control.attr('typeahead-template-url', attrs.itemTemplate);
+				element.removeAttr(attrs.$attrs.itemTemplate);
+			}
 			return link;
 		}
 		
