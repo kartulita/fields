@@ -2,11 +2,9 @@
 	'use strict';
 	/**
 	 * @ngdoc module
-	 * @module battlesnake.fields
+	 * @module fields
 	 * @requires dsl
 	 * @requires directive-proxy
-	 * @requires {@link http://angular-ui.github.io/bootstrap/|UI Bootstrap}
-	 * @requires {@link http://underscorejs.org|Underscore}
 	 *
 	 * @description
 	 * Implements various field types, and also proxy directives which can
